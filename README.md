@@ -3,7 +3,7 @@
 Small helper to generate random standup order, deterministic by date.
 That means the same result for everyone curling the team URL at the same (UTC) day.
 
-Useful for standups in self-organized remote teams.
+Useful for standups in self-organized distributed teams.
 
 ## TL;DR
 
