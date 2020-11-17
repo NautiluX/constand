@@ -5,4 +5,4 @@ RUN go build order.go
 
 FROM alpine:latest
 COPY --from=builder /app/order /order
-CMD ["/order"]
+CMD ["/order", "-l"]
