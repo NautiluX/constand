@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io/ioutil"
+
 	"log"
 	"math/rand"
 	"net/http"
@@ -70,11 +71,21 @@ func pickOneHandler(w http.ResponseWriter, r *http.Request) {
 	date := getDate(r)
 
 	response := getPickOneResponse(team, date, purpose)
+	html := wrapHtml("Volunteer hunting!", response, response)
+
 	fmt.Print(response)
-	_, err := w.Write([]byte(response))
+	_, err := w.Write([]byte(html))
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
+}
+
+func wrapHtml(title, short, content string) string {
+	html := "<!doctype html> <html> <head>"
+	html += "<meta property=\"og:title\" content=\"" + title + "\">"
+	html += "<meta property=\"og:description\" content=\"" + short + "\">"
+	html += "</head><body><pre>" + content + "</pre></body></html>"
+	return html
 }
 
 func getPickOneResponse(team []string, date time.Time, purpose string) string {
@@ -94,9 +105,11 @@ func standupOrderHandler(w http.ResponseWriter, r *http.Request) {
 	date := getDate(r)
 
 	response := getStandupOrderResponse(team, date)
+	short := fmt.Sprintf("Order for %s: %v", date.Format("2006-01-02"), strings.Join(getStandupOrder(team, date), ", "))
+	html := wrapHtml("Your standup order", short, response)
 	fmt.Print(response)
 
-	_, err := w.Write([]byte(response))
+	_, err := w.Write([]byte(html))
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
