@@ -14,7 +14,28 @@ import (
 
 func main() {
 	http.HandleFunc("/", standupOrderHandler)
+	http.HandleFunc("/pick/one/for", pickOneHandler)
 	log.Fatal(http.ListenAndServe(":8081", nil))
+}
+
+func pickOneHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL)
+	team := getTeam(r)
+	purpose := getPurpose(r)
+	date := getDate(r)
+	pick := getOne(team, date, purpose)
+	responsePurpose := ""
+	if purpose != "" {
+		responsePurpose = " for " + purpose
+
+	}
+	response := fmt.Sprintf("Here is your volunteer%s: %s\n", responsePurpose, pick)
+	fmt.Print(response)
+
+	_, err := w.Write([]byte(response))
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
 }
 
 func standupOrderHandler(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +45,7 @@ func standupOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	standupOrder := getStandupOrder(team, date)
 
-	fmt.Printf("Standup order for %s: %v", date.Format("2006-01-02"), standupOrder)
+	fmt.Printf("Standup order for %s: %v\n", date.Format("2006-01-02"), standupOrder)
 
 	response := "Standup order for "
 	response += date.Format("2006-01-02")
@@ -44,6 +65,15 @@ func getTeam(r *http.Request) []string {
 	return team
 }
 
+func getPurpose(r *http.Request) string {
+	q := r.URL.Query()
+	purpose := q["purpose"]
+	if len(purpose) > 0 {
+		return purpose[0]
+	}
+	return ""
+}
+
 func getDate(r *http.Request) time.Time {
 	q := r.URL.Query()
 	date := time.Now().UTC()
@@ -61,15 +91,21 @@ func removeElement(slice []string, index int) []string {
 	return append(slice[:index], slice[index+1:]...)
 }
 
-func generateSeed(team []string, date time.Time) int64 {
+func generateSeed(team []string, date time.Time, purpose string) int64 {
 	dateteam := date.Format("2006-01-02")
 	dateteam += strings.Join(team, "-")
+	dateteam += purpose
 	sum := sha256.Sum256([]byte(dateteam))
 	return int64(binary.BigEndian.Uint64(sum[:]))
 }
 
+func getOne(team []string, date time.Time, purpose string) string {
+	rand.Seed(generateSeed(team, date, purpose))
+	return team[rand.Intn(len(team))]
+}
+
 func getStandupOrder(team []string, date time.Time) []string {
-	rand.Seed(generateSeed(team, date))
+	rand.Seed(generateSeed(team, date, ""))
 	teamsize := len(team)
 	teamcopy := make([]string, teamsize)
 	copy(teamcopy, team)
