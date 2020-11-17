@@ -5,12 +5,22 @@ That means the same result for everyone curling the team URL at the same (UTC) d
 
 Useful for standups or finding volunteers in self-organized distributed teams.
 
-## How to use
-
-Constand can be run on a server or as cli. To build locally, run
+## Install binary
 
 ```
-go build .
+go get -u github.com/NautiluX/constand
+```
+
+## How to use
+
+Constand can be run as web server or as cli.
+
+### Running a web server
+
+```
+constand -l
+curl "localhost:8081?team=Alice&team=Bob"
+curl "localhost:8081/pick/one/for?team=Alice&team=Bob&purpose=retro"
 ```
 
 ### Running a web server with docker
@@ -18,15 +28,6 @@ go build .
 ```
 docker build . -t order:latest
 docker run -t -i -p 8081:8081 order:latest
-curl "localhost:8081?team=Alice&team=Bob"
-curl "localhost:8081/pick/one/for?team=Alice&team=Bob&purpose=retro"
-```
-
-### Running a web server using cli
-
-```
-go build .
-./constand -l
 curl "localhost:8081?team=Alice&team=Bob"
 curl "localhost:8081/pick/one/for?team=Alice&team=Bob&purpose=retro"
 ```
@@ -45,13 +46,21 @@ team:
 Afterwards you can quickly generate a standup order with
 
 ```
-./constand 
+constand 
 ```
 
 or pick a volunteer with
 
 ```
-./constand -p teammeeting -1 #this is a number
+constand -p teammeeting -1 #this is a number
+```
+
+## Development
+
+### Build
+
+```
+go build .
 ```
 
 ## The name
